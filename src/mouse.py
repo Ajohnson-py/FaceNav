@@ -37,6 +37,7 @@ class MouseHandler:
 
             event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), 0)
             CGEventPost(kCGHIDEventTap, event)
+            time.sleep(0.01)
 
     def _click(self, button: str) -> None:
         """Private method that left or right clicks at current mouse position"""
