@@ -5,6 +5,9 @@ import time
 
 
 def main() -> None:
+    frame_target_time = 1000 / 60  # 60 FPS
+    previous_frame_time = 0
+
     detection_handler = DetectionHandler('./face_landmarker.task')
 
     cap = cv2.VideoCapture(1)
@@ -12,6 +15,11 @@ def main() -> None:
 
     ret = True
     while ret:
+        time_to_wait = frame_target_time - (time.time() - previous_frame_time)
+
+        if time_to_wait > 0:
+            time.sleep(time_to_wait)
+
         ret, frame = cap.read()
 
         if not ret:

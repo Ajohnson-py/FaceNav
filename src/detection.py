@@ -16,7 +16,7 @@ class DetectionHandler:
             """callback method for detector"""
             self.detection_result = result  # Store the latest detection result
 
-        self.mouse = MouseHandler(0.1)
+        self.mouse = MouseHandler(0.2)
         self.last_click_time = 0
 
         self.base_options = python.BaseOptions(model_asset_path=model_asset_path)
@@ -52,7 +52,7 @@ class DetectionHandler:
                 # Up and down mouse movement
                 elif category.category_name == "mouthShrugUpper" and category.score > 0.5:
                     self.mouse.expression_action = (0, -10)
-                elif category.category_name == "mouthRollLower" and category.score > 0.045:
+                elif category.category_name == "mouthRollLower" and category.score > 0.055:
                     self.mouse.expression_action = (0, 10)
 
                 # Left and right click mouse input
