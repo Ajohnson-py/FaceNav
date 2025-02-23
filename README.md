@@ -9,7 +9,7 @@ The plan for FaceNav is two-fold: create an accessible way for people to use mac
 
 ### Main features to come:
 
-- Add constant frame update time
+- Constant frame update time
 - Drag-and-drop functionality
 - Right-click functionality
 - A GUI allowing users to easily adjust the sensitivity of facial expressions and cursor speed
