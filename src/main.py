@@ -5,7 +5,7 @@ import time
 
 
 def main() -> None:
-    frame_target_time = 1 / 60  # In seconds
+    frame_target_time = 1 / 60
     previous_frame_time = time.time()
 
     detection_handler = DetectionHandler('./face_landmarker.task')

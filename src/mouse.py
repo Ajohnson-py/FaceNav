@@ -5,8 +5,11 @@ from Quartz.CoreGraphics import (
     CGEventCreate, CGEventGetLocation, CGEventCreateMouseEvent,
     kCGEventMouseMoved, kCGEventLeftMouseDown, kCGEventLeftMouseUp,
     kCGEventRightMouseDown, kCGEventRightMouseUp, kCGMouseButtonLeft,
-    CGEventPost, kCGHIDEventTap
+    CGEventPost, kCGHIDEventTap, CGDisplayPixelsWide, CGDisplayPixelsHigh,
+    CGMainDisplayID
 )
+
+from AppKit import NSScreen
 
 
 class MouseHandler:
@@ -28,12 +31,17 @@ class MouseHandler:
     def _move_cursor(self, dx: int, dy: int) -> None:
         """Private method that moves the mouse relative to its current position"""
         x, y = self._get_position()
+
+        screen_width = CGDisplayPixelsWide(CGMainDisplayID())
+        screen_height = CGDisplayPixelsHigh(CGMainDisplayID())
+
         step_x, step_y = int(dx * self.cursor_sensitivity), int(dy * self.cursor_sensitivity)
 
         num_steps = max(abs(dx), abs(dy))
         for _ in range(num_steps):
-            x += step_x
-            y += step_y
+            # Clamp x and y values to inside the screen
+            x = max(0, min(screen_width - 1, x + step_x))
+            y = max(0, min(screen_height - 1, y + step_y))
 
             event = CGEventCreateMouseEvent(None, kCGEventMouseMoved, (x, y), 0)
             CGEventPost(kCGHIDEventTap, event)
@@ -43,12 +51,14 @@ class MouseHandler:
         """Private method that left or right clicks at current mouse position"""
         x, y = self._get_position()
 
+        # Left click
         if button == "left":
             event_down = CGEventCreateMouseEvent(None, kCGEventLeftMouseDown, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_down)
 
             event_up = CGEventCreateMouseEvent(None, kCGEventLeftMouseUp, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_up)
+        # Right click
         elif button == "right":
             event_down = CGEventCreateMouseEvent(None, kCGEventRightMouseDown, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_down)

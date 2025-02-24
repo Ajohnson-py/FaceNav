@@ -14,7 +14,7 @@ class DetectionHandler:
     def __init__(self, model_asset_path):
         def result_callback(result, output_timestamp_ms, unused_arg=None):
             """callback method for detector"""
-            self.detection_result = result  # Store the latest detection result
+            self.detection_result = result
 
         self.mouse = MouseHandler(0.2)
         self.last_click_time = 0
@@ -50,14 +50,14 @@ class DetectionHandler:
                     self.mouse.expression_action = (10, 0)
 
                 # Up and down mouse movement
-                elif category.category_name == "mouthShrugUpper" and category.score > 0.5:
+                if category.category_name == "mouthShrugUpper" and category.score > 0.57:
                     self.mouse.expression_action = (0, -10)
-                elif category.category_name == "mouthRollLower" and category.score > 0.055:
+                elif category.category_name == "mouthRollLower" and category.score > 0.2:
                     self.mouse.expression_action = (0, 10)
 
                 # Left and right click mouse input
                 # TODO: Add right click
-                if category.category_name == "browInnerUp" and category.score > 0.32:
+                if category.category_name == "browInnerUp" and category.score > 0.18:
                     current_time = time.time()
 
                     # Only click if enough time has passed since the last click
