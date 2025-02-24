@@ -5,8 +5,8 @@ import time
 
 
 def main() -> None:
-    frame_target_time = 1000 / 60  # 60 FPS
-    previous_frame_time = 0
+    frame_target_time = 1 / 60  # In seconds
+    previous_frame_time = time.time()
 
     detection_handler = DetectionHandler('./face_landmarker.task')
 
@@ -15,7 +15,9 @@ def main() -> None:
 
     ret = True
     while ret:
-        time_to_wait = frame_target_time - (time.time() - previous_frame_time)
+        current_time = time.time()
+        elapsed_time = current_time - previous_frame_time
+        time_to_wait = frame_target_time - elapsed_time
 
         if time_to_wait > 0:
             time.sleep(time_to_wait)
