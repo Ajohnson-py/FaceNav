@@ -9,8 +9,6 @@ from Quartz.CoreGraphics import (
     CGMainDisplayID
 )
 
-from AppKit import NSScreen
-
 
 class MouseHandler:
     def __init__(self, cursor_sensitivity):
