@@ -73,17 +73,17 @@ class DetectionHandler:
                     if category.score > 0.6:
 
                         if self.eye_blink_start_time is None:
-                            self.eye_blink_start_time = current_time  # Start timer if not already started
+                            self.eye_blink_start_time = current_time
 
                         # If enough time has passed, trigger the right-click
                         if current_time - self.eye_blink_start_time >= 0.8:
                             print("Right click!")
                             self.mouse.expression_action = "clickRight"
                             self.last_click_time = current_time
-                            self.eye_blink_start_time = None  # Reset after action
+                            self.eye_blink_start_time = None
 
+                    # Reset only when eye fully opens again
                     if category.score < 0.5:
-                        # Reset only when eye fully opens again
                         self.eye_blink_start_time = None
         except IndexError:
             pass

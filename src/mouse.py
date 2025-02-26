@@ -16,6 +16,11 @@ class MouseHandler:
         self.expression_action = None
         self.running = True
 
+        self.speed_multiplier = 1.0
+        self.speed_increment = 0.1
+        self.max_speed = 6
+        self.last_move_time = time.time()
+
         # Start the listener in a separate thread
         self.listener_thread = threading.Thread(target=self._listen_for_expression, daemon=True)
         self.listener_thread.start()
@@ -27,17 +32,29 @@ class MouseHandler:
         return position.x, position.y
 
     def _move_cursor(self, dx: int, dy: int) -> None:
-        """Private method that moves the mouse relative to its current position"""
-        x, y = self._get_position()
+        """Private method that moves the cursor relative to its current position at increasing speed"""
+        # Reset speed multiplier is no movement
+        if dx == 0 and dy == 0:
+            self.speed_multiplier = 1.0
+            return
 
+        # Increase speed over time, but cap it at max_speed
+        if time.time() - self.last_move_time < 0.25:  # If moving continuously
+            self.speed_multiplier = min(self.speed_multiplier + self.speed_increment, self.max_speed)
+        else:
+            self.speed_multiplier = 1.0
+
+        self.last_move_time = time.time()
+
+        x, y = self._get_position()
         screen_width = CGDisplayPixelsWide(CGMainDisplayID())
         screen_height = CGDisplayPixelsHigh(CGMainDisplayID())
 
-        step_x, step_y = int(dx * self.cursor_sensitivity), int(dy * self.cursor_sensitivity)
+        step_x, step_y = int(dx * self.cursor_sensitivity * self.speed_multiplier), \
+            int(dy * self.cursor_sensitivity * self.speed_multiplier)
 
         num_steps = max(abs(dx), abs(dy))
         for _ in range(num_steps):
-            # Clamp x and y values to inside the screen
             x = max(0, min(screen_width - 1, x + step_x))
             y = max(0, min(screen_height - 1, y + step_y))
 
