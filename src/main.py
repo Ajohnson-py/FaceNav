@@ -1,14 +1,16 @@
 import mediapipe as mp
+import multiprocessing
 import cv2
-from detection import DetectionHandler
 import time
+from detection import DetectionHandler
+from app import MenuBarApp
 
 
-def main() -> None:
+def facial_detection_loop(running) -> None:
     frame_target_time = 1 / 60
     previous_frame_time = time.time()
 
-    detection_handler = DetectionHandler('./face_landmarker.task')
+    detection_handler = DetectionHandler('./face_landmarker.task', running)
 
     cap = cv2.VideoCapture(1)
     start_time = time.time()
@@ -32,6 +34,11 @@ def main() -> None:
         timestamp = int((time.time() - start_time) * 1000)
         detection_handler.update_handler_image(rgb_frame, timestamp)
 
+        detection_handler.update_handler_running_status(running.value)
+        detection_handler.perform_computer_action()
+
+        running.value = detection_handler.get_running_status()
+
         annotated_image = detection_handler.draw_facial_landmarks(rgb_frame.numpy_view())
         annotated_image = cv2.flip(annotated_image, 1)
 
@@ -40,10 +47,30 @@ def main() -> None:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             ret = False
 
-        detection_handler.perform_computer_action()
-
     cap.release()
     cv2.destroyAllWindows()
+
+
+def start_menu_app(running) -> None:
+    """Runs the menu bar app in a separate process"""
+    app = MenuBarApp(running)
+    app.run()
+
+
+def main() -> None:
+    running = multiprocessing.Value('b', True)
+
+    # Start face detection process
+    face_process = multiprocessing.Process(target=facial_detection_loop, args=(running,))
+    face_process.start()
+
+    # Start menu bar process
+    menu_process = multiprocessing.Process(target=start_menu_app, args=(running,))
+    menu_process.start()
+
+    # Wait for both processes to finish
+    face_process.join()
+    menu_process.join()
 
 
 if __name__ == '__main__':

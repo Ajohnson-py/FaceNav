@@ -33,7 +33,7 @@ class MouseHandler:
 
     def _move_cursor(self, dx: int, dy: int) -> None:
         """Private method that moves the cursor relative to its current position at increasing speed"""
-        # Reset speed multiplier is no movement
+        # Reset speed multiplier if no movement
         if dx == 0 and dy == 0:
             self.speed_multiplier = 1.0
             return
@@ -53,8 +53,10 @@ class MouseHandler:
         step_x, step_y = int(dx * self.cursor_sensitivity * self.speed_multiplier), \
             int(dy * self.cursor_sensitivity * self.speed_multiplier)
 
+        # Move cursor one pixel at a time in dx and dy
         num_steps = max(abs(dx), abs(dy))
         for _ in range(num_steps):
+            # Clamp cursor position to stay within the screen
             x = max(0, min(screen_width - 1, x + step_x))
             y = max(0, min(screen_height - 1, y + step_y))
 
