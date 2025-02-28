@@ -1,76 +1,30 @@
-import mediapipe as mp
 import multiprocessing
-import cv2
-import time
-from detection import DetectionHandler
-from app import MenuBarApp
-
-
-def facial_detection_loop(running) -> None:
-    frame_target_time = 1 / 60
-    previous_frame_time = time.time()
-
-    detection_handler = DetectionHandler('./face_landmarker.task', running)
-
-    cap = cv2.VideoCapture(1)
-    start_time = time.time()
-
-    ret = True
-    while ret:
-        current_time = time.time()
-        elapsed_time = current_time - previous_frame_time
-        time_to_wait = frame_target_time - elapsed_time
-
-        if time_to_wait > 0:
-            time.sleep(time_to_wait)
-
-        ret, frame = cap.read()
-
-        if not ret:
-            print("Failed to grab frame")
-            break
-
-        rgb_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-        timestamp = int((time.time() - start_time) * 1000)
-        detection_handler.update_handler_image(rgb_frame, timestamp)
-
-        detection_handler.update_handler_running_status(running.value)
-        detection_handler.perform_computer_action()
-
-        running.value = detection_handler.get_running_status()
-
-        annotated_image = detection_handler.draw_facial_landmarks(rgb_frame.numpy_view())
-        annotated_image = cv2.flip(annotated_image, 1)
-
-        cv2.imshow('FaceNav', annotated_image)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            ret = False
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-
-def start_menu_app(running) -> None:
-    """Runs the menu bar app in a separate process"""
-    app = MenuBarApp(running)
-    app.run()
+from detection import facial_detection_loop
+from app import start_menu_bar_app
 
 
 def main() -> None:
-    running = multiprocessing.Value('b', True)
+    not_paused = multiprocessing.Value('b', True)
 
     # Start face detection process
-    face_process = multiprocessing.Process(target=facial_detection_loop, args=(running,))
+    face_process = multiprocessing.Process(target=facial_detection_loop, args=(not_paused,))
     face_process.start()
 
     # Start menu bar process
-    menu_process = multiprocessing.Process(target=start_menu_app, args=(running,))
+    menu_process = multiprocessing.Process(target=start_menu_bar_app, args=(not_paused,))
     menu_process.start()
 
-    # Wait for both processes to finish
-    face_process.join()
-    menu_process.join()
+    # Keep running while facial loop and menu bar app is alive
+    while face_process.is_alive() and menu_process.is_alive():
+        continue
+
+    # If facial loop or menu bar app quits, terminate program
+    if face_process.is_alive():
+        face_process.terminate()
+        face_process.join()
+    else:
+        menu_process.terminate()
+        menu_process.join()
 
 
 if __name__ == '__main__':
