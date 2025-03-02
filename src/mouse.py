@@ -64,19 +64,20 @@ class MouseHandler:
             CGEventPost(kCGHIDEventTap, event)
             time.sleep(0.01)
 
-    def _click(self, button: str) -> None:
+    def _click(self, button: str, release=None) -> None:
         """Private method that left or right clicks at current mouse position"""
         x, y = self._get_position()
 
         # Left click
-        if button == "left":
+        if button == "clickLeft" and release is False:
             event_down = CGEventCreateMouseEvent(None, kCGEventLeftMouseDown, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_down)
-
+        elif button == "clickLeft" and release is True:
             event_up = CGEventCreateMouseEvent(None, kCGEventLeftMouseUp, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_up)
+
         # Right click
-        elif button == "right":
+        elif button == "clickRight":
             event_down = CGEventCreateMouseEvent(None, kCGEventRightMouseDown, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_down)
 
@@ -86,15 +87,16 @@ class MouseHandler:
     def _listen_for_expression(self):
         """Background thread: listens for facial expression actions"""
         while self.running:
-            if self.expression_action == "clickLeft":
-                self._click("left")
-                self.expression_action = None
+            if isinstance(self.expression_action, tuple):
+                if isinstance(self.expression_action[0], str):
+                    self._click(self.expression_action[0], self.expression_action[1])
+                    self.expression_action = None
+                elif isinstance(self.expression_action[0], int):
+                    dx, dy = self.expression_action
+                    self._move_cursor(dx, dy)
+                    self.expression_action = None
             elif self.expression_action == "clickRight":
-                self._click("right")
-                self.expression_action = None
-            elif isinstance(self.expression_action, tuple):
-                dx, dy = self.expression_action
-                self._move_cursor(dx, dy)
+                self._click("clickRight", )
                 self.expression_action = None
 
             time.sleep(0.01)

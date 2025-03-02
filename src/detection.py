@@ -1,8 +1,7 @@
-import time
-
 import mediapipe as mp
 import numpy as np
 import cv2
+import time
 from numpy import ndarray
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
@@ -13,18 +12,18 @@ from mouse import MouseHandler
 
 class DetectionHandler:
     def __init__(self, model_asset_path, not_paused):
-
         def result_callback(result, output_timestamp_ms, unused_arg=None):
             """callback method for detector"""
             self.detection_result = result
 
         self.not_paused = not_paused.value
 
-        self.mouse = MouseHandler(0.2)
+        self.brow_status = None
+
+        self.mouse = MouseHandler(0.1)
         self.last_click_time = 0
         self.eye_blink_start_time = None
         self.eyebrow_raise_count = 0
-        self.last_eyebrow_raise_time = 0
 
         self.base_options = python.BaseOptions(model_asset_path=model_asset_path)
         self.detector = vision.FaceLandmarker.create_from_options(
@@ -55,7 +54,6 @@ class DetectionHandler:
             blendshapes = self.detection_result.face_blendshapes[0]
 
             for category in blendshapes:
-                # Face can only do one action at a time to prevent accidental input
                 # Right and left mouse movement
                 if category.category_name == "mouthLeft" and category.score > 0.25 and self.not_paused:
                     self.mouse.expression_action = (-10, 0)
@@ -68,34 +66,35 @@ class DetectionHandler:
                 elif category.category_name == "mouthRollLower" and category.score > 0.2 and self.not_paused:
                     self.mouse.expression_action = (0, 10)
 
-                # Left and right click mouse input
-                if category.category_name == "browInnerUp" and category.score > 0.18:
-                    current_time = time.time()
+                # Left click mouse input
+                if category.category_name == "browInnerUp":
+                    # Check if eyebrow is raised
+                    if category.score > 0.2 and self.brow_status is None:
+                        self.brow_status = "up"
+                        self.mouse.expression_action = ("clickLeft", False)
 
-                    # Resume program if paused
-                    if not self.not_paused:
-                        print(current_time - self.last_eyebrow_raise_time)
-                        if self.eyebrow_raise_count >= 2 and (current_time - self.last_eyebrow_raise_time) <= 2.5:
-                            print(current_time - self.last_eyebrow_raise_time)
-                            self.not_paused = True
-                            self.last_eyebrow_raise_time = 0
-                            self.eyebrow_raise_count = 0
-                        if current_time - self.last_eyebrow_raise_time > 0.75:
-                            print("Brow count +1")
+                    # Check if eyebrow is lowered
+                    if self.brow_status == "up" and category.score < 0.02:
+                        if self.not_paused:
+                            self.mouse.expression_action = self.mouse.expression_action = ("clickLeft", True)
+
+                        self.last_click_time = time.time()
+                        self.brow_status = None
+
+                        # Increment eyebrow raise count if program is paused
+                        if not self.not_paused:
                             self.eyebrow_raise_count += 1
-                            if self.eyebrow_raise_count == 1:
-                                self.last_eyebrow_raise_time = current_time
-                        if current_time - self.last_eyebrow_raise_time > 2.5:
-                            print("Reset")
-                            self.eyebrow_raise_count = 0
-                            self.last_eyebrow_raise_time = 0
+                            self.last_click_time = time.time()
 
-                    # Only click if enough time has passed since the last click
-                    elif current_time - self.last_click_time > 0.5:
-                        self.mouse.expression_action = "clickLeft"
-                        self.last_click_time = current_time
+                    # Reset eyebrow raise count
+                    if time.time() - self.last_click_time > 1.5:
+                        self.eyebrow_raise_count = 0
+                    # Unpause program
+                    elif self.eyebrow_raise_count >= 2:
+                        self.not_paused = True
+                        self.eyebrow_raise_count = 0
 
-                # TODO: Make right click more polished to use
+                # Right click mouse input
                 if category.category_name == "eyeBlinkLeft" and self.not_paused:
                     current_time = time.time()
 
