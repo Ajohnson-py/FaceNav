@@ -71,7 +71,8 @@ class DetectionHandler:
                     # Check if eyebrow is raised
                     if category.score > 0.2 and self.brow_status is None:
                         self.brow_status = "up"
-                        self.mouse.expression_action = ("clickLeft", False)
+                        if self.not_paused:
+                            self.mouse.expression_action = ("clickLeft", False)
 
                     # Check if eyebrow is lowered
                     if self.brow_status == "up" and category.score < 0.02:
