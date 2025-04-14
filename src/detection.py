@@ -7,7 +7,7 @@ from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from mouse import MouseHandler
+from src.mouse import MouseHandler
 
 
 class DetectionHandler:
@@ -160,7 +160,7 @@ def facial_detection_loop(not_paused) -> None:
     frame_target_time = 1 / 60
     previous_frame_time = time.time()
 
-    detection_handler = DetectionHandler('./face_landmarker.task', not_paused)
+    detection_handler = DetectionHandler('./models/face_landmarker.task', not_paused)
 
     cap = cv2.VideoCapture(1)
     start_time = time.time()

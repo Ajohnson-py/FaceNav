@@ -1,6 +1,6 @@
 import multiprocessing
-from detection import facial_detection_loop
-from app import start_menu_bar_app
+from src.detection import facial_detection_loop
+from src.app import start_menu_bar_app
 
 
 def main() -> None:
