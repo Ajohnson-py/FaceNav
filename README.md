@@ -103,7 +103,7 @@ SOFTWARE.
 
 ## Author Info
 
-- LinkedIn - [August Johnson](www.linkedin.com/in/aug-johnson)
+- LinkedIn - [August Johnson](https://www.linkedin.com/in/aug-johnson)
 
 
 [Back To The Top](#FaceNav)
