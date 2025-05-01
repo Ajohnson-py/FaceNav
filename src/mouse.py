@@ -5,8 +5,8 @@ from Quartz.CoreGraphics import (
     CGEventCreate, CGEventGetLocation, CGEventCreateMouseEvent,
     kCGEventMouseMoved, kCGEventLeftMouseDown, kCGEventLeftMouseUp,
     kCGEventRightMouseDown, kCGEventRightMouseUp, kCGMouseButtonLeft,
-    CGEventPost, kCGHIDEventTap, CGDisplayPixelsWide, CGDisplayPixelsHigh,
-    CGMainDisplayID
+    kCGMouseButtonRight, CGEventPost, kCGHIDEventTap, CGDisplayPixelsWide,
+    CGDisplayPixelsHigh, CGMainDisplayID
 )
 
 
@@ -81,7 +81,7 @@ class MouseHandler:
             event_down = CGEventCreateMouseEvent(None, kCGEventRightMouseDown, (x, y), kCGMouseButtonLeft)
             CGEventPost(kCGHIDEventTap, event_down)
 
-            event_up = CGEventCreateMouseEvent(None, kCGEventRightMouseUp, (x, y), kCGMouseButtonLeft)
+            event_up = CGEventCreateMouseEvent(None, kCGEventRightMouseUp, (x, y), kCGMouseButtonRight)
             CGEventPost(kCGHIDEventTap, event_up)
 
     def _listen_for_expression(self):
