@@ -64,6 +64,8 @@ python main.py
 
 Once you’ve installed and launched FaceNav (python main.py), your webcam will activate and begin analyzing your facial expressions in real-time.
 
+> Tip: If you run into issues where the camera does not work, try changing ```cap = cv2.VideoCapture(0)``` to ```cap = cv2.VideoCapture(1)``` in line 165 of detection.py
+
 Basic Usage:
 - Move your mouth **left/right** to move the mouse in the corresponding direction. For **upward movement**, push your bottom lip into your top lip, and for **downward movement**, suck your top lip into your mouth.
 - To **left-click**, move your eyebrows up and then back down (dragging can be done by keeping them up).

@@ -162,7 +162,7 @@ def facial_detection_loop(not_paused) -> None:
 
     detection_handler = DetectionHandler('./models/face_landmarker.task', not_paused)
 
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     start_time = time.time()
 
     ret = True
